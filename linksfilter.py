@@ -256,6 +256,11 @@ if __name__ == "__main__":
   missing_links['titel'],missing_links['beschreibung'],missing_links['link'] = zip(*missing_links['uri'].progress_apply(enrich_link))
   links_df = pd.concat([filled_links,missing_links])
 
+  #fill empty cells
+  links_df['titel'] =  links_df.apply(lambda x: x['title'] if x['titel'] == '' else x['titel'],axis=1).fillna('')
+  links_df['link'] =  links_df.apply(lambda x: x['uri'] if x['link'] == '' else x['link'],axis=1).fillna('')
+  links_df['beschreibung'] =  links_df.apply(lambda x: x['description'] if x['beschreibung'] == '' else x['beschreibung'],axis=1).fillna(links_df['titel'])
+
   #update parsed data
   NEW_PARSED = pd.concat([PARSED_DF,missing_links]).drop_duplicates(subset='uri')
   NEW_PARSED.to_csv(PARSED_PATH, index=False)
