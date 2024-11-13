@@ -1,7 +1,7 @@
 from atproto import Client, models
 from datetime import datetime, timezone
 import json
-import opengraph_py3
+#import opengraph_py3
 from functools import cache
 import requests
 from tqdm import tqdm
