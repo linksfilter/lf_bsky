@@ -91,7 +91,7 @@ def gen_link(start, end, uri):
         }]
     }
 
-def create_bsky_linkpost(title,description,link,thumb):
+def create_bsky_linkpost(title,description,link,image):
     ''' Post into Bluesky 
     '''
     try:
@@ -99,12 +99,26 @@ def create_bsky_linkpost(title,description,link,thumb):
 
         # Identify links and generate AT facets so that they act as links
         facets = generate_facets_from_links_in_text(text)
+
+        # Create a short description for the preview card
+        short_desc = ''
+        thumb = None
+
+        # See whether there's a thumbnail defined
+        if image is not None and image != 'None':
+            # fetch it
+            response = requests.get(image)
+            img_data = response.content
+
+            # Upload the image
+            upload = BSKY_CLIENT.com.atproto.repo.upload_blob(img_data)
+            thumb = upload.blob
         
         # Create a link card embed
         embed_external = models.AppBskyEmbedExternal.Main(
             external=models.AppBskyEmbedExternal.External(
                 title=title,
-                description=description,
+                description=short_desc,
                 uri=link,
                 thumb=thumb
             )
@@ -117,7 +131,7 @@ def create_bsky_linkpost(title,description,link,thumb):
                 collection='app.bsky.feed.post',
                 record=models.AppBskyFeedPost.Record(
                 createdAt=datetime.now(timezone.utc).replace(tzinfo=None).isoformat(timespec="milliseconds") + "Z", 
-                text=description, 
+                text=f"{description} {link}", 
                 embed=embed_external,
                 facets=facets
                 ),
