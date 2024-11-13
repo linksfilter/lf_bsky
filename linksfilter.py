@@ -272,7 +272,7 @@ if __name__ == "__main__":
   if len(new_links)>0:
     for link in new_links:
       print('posting '+link)
-      create_bsky_linkpost(links_df[links_df['link']==link].iloc[0]['title'],links_df[links_df['link']==link].iloc[0]['description'],links_df[links_df['link']==link].iloc[0]['link'],links_df[links_df['link']==link].iloc[0]['thumb'])
+      create_bsky_linkpost(links_df[links_df['link']==link].iloc[0]['titel'],links_df[links_df['link']==link].iloc[0]['beschreibung'],links_df[links_df['link']==link].iloc[0]['link'],links_df[links_df['link']==link].iloc[0]['thumb'])
     new_list = OLDLIST+new_links
     with open(POSTED_PATH, mode='w') as f:
         f.write("\n".join(new_list) + "\n")
