@@ -259,7 +259,7 @@ if __name__ == "__main__":
   #fill empty cells
   links_df['titel'] =  links_df.apply(lambda x: x['title'] if x['titel'] == '' else x['titel'],axis=1).fillna('')
   links_df['link'] =  links_df.apply(lambda x: x['uri'] if x['link'] == '' else x['link'],axis=1).fillna('')
-  links_df['beschreibung'] =  links_df.apply(lambda x: x['description'] if x['beschreibung'] == '' else x['beschreibung'],axis=1).fillna(links_df['titel'])
+  links_df['beschreibung'] =  links_df.apply(lambda x: x['description'] if x['beschreibung'] is None else x['titel'],axis=1)
 
   #update parsed data
   NEW_PARSED = pd.concat([PARSED_DF,missing_links]).drop_duplicates(subset='uri')
