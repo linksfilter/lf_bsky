@@ -8,6 +8,7 @@ from tqdm import tqdm
 from newspaper import Article
 import pandas as pd
 import re
+import os
 
 #initialize tqdm for apply_progress
 tqdm.pandas()
