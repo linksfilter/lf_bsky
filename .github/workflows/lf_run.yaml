@@ -35,6 +35,11 @@ jobs:
         env:
             BSKY_USER: ${{ secrets.BSKY_USER }}
             BSKY_PASS: ${{ secrets.BSKY_PASS }}
+            CONSUMER_KEY: ${{ secrets.TW_CONSUMER_KEY }}
+            CONSUMER_SECRET: ${{ secrets.TW_CONSUMER_SECRET }}
+
+            ACCESS_TOKEN: ${{ secrets.TW_ACCESS_TOKEN }}
+            ACCESS_TOKEN_SECRET: ${{ secrets.TW_ACCESS_TOKEN_SECRET }}
         run: |
              python linksfilter.py
 
