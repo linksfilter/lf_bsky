@@ -21,7 +21,7 @@ POSTED_PATH = 'posted.csv'
 URL_PATTERN = re.compile(r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\\(\\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+')
 
 #set share threshhold for reposting
-THRESH = 3
+THRESH = 5
 
 #load bluesky user data
 BSKY_USER= os.environ['BSKY_USER']
