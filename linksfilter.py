@@ -1,4 +1,5 @@
 from atproto import Client, models
+import tweepy
 from datetime import datetime, timezone
 import json
 #import opengraph_py3
@@ -26,9 +27,23 @@ THRESH = 3
 BSKY_USER= os.environ['BSKY_USER']
 BSKY_PASS= os.environ['BSKY_PASS']
 
+
 #set up bluesky client
 BSKY_CLIENT = Client()
 profile = BSKY_CLIENT.login(BSKY_USER, BSKY_PASS)
+
+#load twitter user data
+CONSUMER_KEY=os.environ['CONSUMER_KEY']
+CONSUMER_SECRET=os.environ['CONSUMER_SECRET']
+ACCESS_TOKEN = os.environ['ACCESS_TOKEN']
+ACCESS_TOKEN_SECRET = os.environ['ACCESS_TOKEN_SECRET']
+
+#set up twitter client
+TW_CLIENT = tweepy.Client(
+    consumer_key=CONSUMER_KEY, consumer_secret=CONSUMER_SECRET,
+    access_token=ACCESS_TOKEN, access_token_secret=ACCESS_TOKEN_SECRET
+)
+
 
 #load domain blacklist
 with open(BLACKLIST_PATH) as f:
@@ -278,6 +293,9 @@ if __name__ == "__main__":
     for link in new_links:
       print('posting '+link)
       create_bsky_linkpost(links_df[links_df['link']==link].iloc[0]['titel'],links_df[links_df['link']==link].iloc[0]['beschreibung'],links_df[links_df['link']==link].iloc[0]['link'],links_df[links_df['link']==link].iloc[0]['thumb'])
+      print('posted to bluesky')
+      TW_CLIENT.create_tweet(text=f"{links_df[links_df['link']==link].iloc[0]['beschreibung']} {links_df[links_df['link']==link].iloc[0]['link']}")
+      print('posted to twitter')
     new_list = OLDLIST+new_links
     with open(POSTED_PATH, mode='w') as f:
         f.write("\n".join(new_list) + "\n")
