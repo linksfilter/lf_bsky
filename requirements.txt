@@ -6,3 +6,4 @@ datetime
 requests
 tqdm
 pandas
+tweepy
