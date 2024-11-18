@@ -68,6 +68,8 @@ def get_bsky_posts(cursor=NOW.strftime("%Y-%m-%dT%H:%M:%S.%fZ"),days = 7):
     posts = json.loads(response)
     data = data+[post['post'] for post in posts['feed']]
     cursor = posts['cursor']
+    if cursor is None:
+        break
     try:
       timestamp = datetime.strptime(posts['cursor'],"%Y-%m-%dT%H:%M:%S.%fZ").replace(tzinfo=timezone.utc)
     except:
