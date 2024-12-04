@@ -292,15 +292,18 @@ if __name__ == "__main__":
 
   #if there is more than one new link, post them and save to file
   if len(new_links)>0:
+    new_list = OLDLIST+new_links
+    with open(POSTED_PATH, mode='w') as f:
+        f.write("\n".join(new_list) + "\n")
     for link in new_links:
       print('posting '+link)
       create_bsky_linkpost(links_df[links_df['link']==link].iloc[0]['titel'],links_df[links_df['link']==link].iloc[0]['beschreibung'],links_df[links_df['link']==link].iloc[0]['link'],links_df[links_df['link']==link].iloc[0]['thumb'])
       print('posted to bluesky')
-      TW_CLIENT.create_tweet(text=f"{links_df[links_df['link']==link].iloc[0]['beschreibung']} {links_df[links_df['link']==link].iloc[0]['link']}")
-      print('posted to twitter')
-    new_list = OLDLIST+new_links
-    with open(POSTED_PATH, mode='w') as f:
-        f.write("\n".join(new_list) + "\n")
+      try:
+        TW_CLIENT.create_tweet(text=f"{links_df[links_df['link']==link].iloc[0]['beschreibung']} {links_df[links_df['link']==link].iloc[0]['link']}")
+        print('posted to twitter')
+      except:
+        print('could not post to twitter')
 
   #finished
   print('linksfilter done')
