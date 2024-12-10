@@ -243,9 +243,9 @@ def enrich_link(link):
   #if title == 'error':
   #    print('Passing ' + link + ' to Opengraph parser')
   #    title,description,new_link = enrich_link_og(link)
-  if title == 'error':
-      print('Passing ' + link + ' to LeWagon parser')
-      title,description,new_link = enrich_link_lw(link)
+  #if title == 'error':
+  #    print('Passing ' + link + ' to LeWagon parser')
+#   title,description,new_link = enrich_link_lw(link)
   return title,description,new_link
 
 if __name__ == "__main__":
