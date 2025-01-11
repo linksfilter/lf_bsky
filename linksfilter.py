@@ -189,6 +189,7 @@ def enrich_link_lw(link):
 
 @cache
 def enrich_link_np(link):
+    print(link)
     try:
       article = Article(link)
       article.download()
