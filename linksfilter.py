@@ -6,7 +6,7 @@ import json
 from functools import cache
 import requests
 from tqdm import tqdm
-from newspaper import Article
+from newspaper import Article, Config
 import pandas as pd
 import re
 import os
