@@ -271,7 +271,7 @@ if __name__ == "__main__":
   links_df = links_df.merge(PARSED_DF[['uri','titel','beschreibung','link']],on='uri',how='left')
   filled_links = links_df[links_df['link'].notna()].copy()
   missing_links = links_df[links_df['link'].isna()].copy()
-  print(missing_links['uri'])
+  #print(missing_links['uri'])
   missing_links['titel'],missing_links['beschreibung'],missing_links['link'] = zip(*missing_links['uri'].progress_apply(enrich_link))
   links_df = pd.concat([filled_links,missing_links])
 
