@@ -190,8 +190,10 @@ def enrich_link_lw(link):
 @cache
 def enrich_link_np(link):
     print(link)
+    config = Config()
+    config.request_timeout = 10
     try:
-      article = Article(link)
+      article = Article(link,config=config)
       article.download()
       article.parse()
       article.canonical_link
