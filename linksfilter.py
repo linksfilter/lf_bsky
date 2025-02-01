@@ -242,7 +242,7 @@ def enrich_link_og(link):
 @cache
 def enrich_link(link):
   print(link)
-  title,description,new_link = enrich_link_np(link)
+  title,description,new_link = enrich_link_og(link)
   #if title == 'error':
   #    print('Passing ' + link + ' to Opengraph parser')
   #    title,description,new_link = enrich_link_og(link)
