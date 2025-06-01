@@ -50,7 +50,7 @@ with open(BLACKLIST_PATH) as f:
     BLACKLIST = [line.rstrip() for line in f]
 
 #load dataframe of links that have already been parsed
-PARSED_DF = pd.read_csv(PARSED_PATH).drop_duplicates(subset='uri')
+PARSED_DF = pd.read_csv(PARSED_PATH).drop_duplicates(subset='uri').tail(2000)
 
 #load links that were already posted
 with open(POSTED_PATH) as f:
