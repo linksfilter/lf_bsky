@@ -50,7 +50,7 @@ with open(BLACKLIST_PATH) as f:
     BLACKLIST = [line.rstrip() for line in f]
 
 #load dataframe of links that have already been parsed
-PARSED_DF = pd.read_csv(PARSED_PATH).drop_duplicates(subset='uri').tail(2000)
+PARSED_DF = pd.read_csv(PARSED_PATH).drop_duplicates(subset='uri')
 
 #load links that were already posted
 with open(POSTED_PATH) as f:
@@ -283,7 +283,7 @@ if __name__ == "__main__":
   links_df['beschreibung'] =  links_df.apply(lambda x: x['description'] if x['beschreibung'] is None else x['titel'],axis=1)
 
   #update parsed data
-  NEW_PARSED = pd.concat([PARSED_DF,missing_links]).drop_duplicates(subset='uri')
+  NEW_PARSED = pd.concat([PARSED_DF,missing_links]).drop_duplicates(subset='uri').tail(10000)
   NEW_PARSED.to_csv(PARSED_PATH, index=False)
 
   #evaluate top links
