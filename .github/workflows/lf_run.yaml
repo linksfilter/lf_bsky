@@ -14,7 +14,7 @@ jobs:
       # Give the default GITHUB_TOKEN write permission to commit and push the changed files back to the repository.
       contents: write
     
-    timeout-minutes: 15
+#    timeout-minutes: 15
     
     steps:
       - name: Checkout
