@@ -91,15 +91,16 @@ for item in items:
     img_html = f'<img src="{thumb}" class="card-img-top" alt="">' if thumb else ""
 
     html += f"""
-    <div class="col-md-4">
-      <div class="card shadow-sm h-100">
-        {img_html}
-        <div class="card-body">
-          <h5 class="card-title">{title}</h5>
-          <p class="card-text">{desc}</p>
-          <a href="{link}" class="btn btn-primary" target="_blank">Open Link</a>
+    <div class="col-12">
+      <a href="{link}" target="_blank">
+        <div class="card shadow-sm">
+          {img_html}
+          <div class="card-body">
+            <h4 class="card-title">{title}</h4>
+            <p class="card-text">{desc}</p>
+          </div>
         </div>
-      </div>
+      </a>
     </div>
     """
 
