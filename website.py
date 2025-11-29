@@ -1,12 +1,12 @@
-import requests
-from bs4 import BeautifulSoup
+import csv
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from dateutil import parser
-import re
 from urllib.parse import urlparse
+import re
 
-INPUT_FILE = "posted.csv"
+POSTED_FILE = "posted.csv"
+PARSED_FILE = "parsed.csv"
 OUTPUT_FILE = "docs/index.html"
 SIM_THRESHOLD = 0.1  # similarity threshold for related links
 
@@ -30,90 +30,40 @@ def capitalized_words(text):
     return " ".join(words)
 
 # -------------------------------
-# Fetch title, description, date
+# Load parsed.csv into a dict by link
 # -------------------------------
-def fetch_meta(link):
-    try:
-        headers = {"User-Agent": "Mozilla/5.0"}
-        resp = requests.get(link, headers=headers, timeout=10)
-        resp.raise_for_status()
-        html = resp.text
-    except:
-        return {"link": link, "title": link, "description": "", "date": ""}
-
-    soup = BeautifulSoup(html, "html.parser")
-    title_tag = soup.find("title")
-    title = title_tag.get_text(strip=True) if title_tag else link
-
-    desc = ""
-    for attr in [{"name": "description"}, {"property": "og:description"}, {"name": "twitter:description"}]:
-        tag = soup.find("meta", attrs=attr)
-        if tag and tag.get("content"):
-            desc = tag["content"]
-            break
-
-    date = ""
-    for attr in [{"property": "article:published_time"}, {"name": "pubdate"}, {"name": "date"}]:
-        tag = soup.find("meta", attrs=attr)
-        if tag and tag.get("content"):
-            date = format_date(tag["content"])
-            break
-
-    return {"link": link, "title": title, "description": desc, "date": date}
+parsed_dict = {}
+with open(PARSED_FILE, encoding="utf-8") as f:
+    reader = csv.DictReader(f)
+    for row in reader:
+        link = row["link"].strip()
+        parsed_dict[link] = {
+            "title": row.get("titel") or row.get("title") or link,
+            "description": row.get("beschreibung") or row.get("description") or "",
+            "thumb": row.get("thumb") or "",
+            "date": row.get("date") or ""
+        }
 
 # -------------------------------
-# Enrich full metadata (for HTML)
+# Load last 50 links from posted.csv
 # -------------------------------
-def enrich_full(link):
-    try:
-        headers = {"User-Agent": "Mozilla/5.0"}
-        resp = requests.get(link, headers=headers, timeout=10)
-        resp.raise_for_status()
-        html = resp.text
-    except:
-        return {"link": link, "title": link, "description": "", "thumb": "", "date": ""}
-
-    soup = BeautifulSoup(html, "html.parser")
-    title_tag = soup.find("title")
-    title = title_tag.get_text(strip=True) if title_tag else link
-
-    desc = ""
-    for attr in [{"name": "description"}, {"property": "og:description"}, {"name": "twitter:description"}]:
-        tag = soup.find("meta", attrs=attr)
-        if tag and tag.get("content"):
-            desc = tag["content"]
-            break
-
-    thumb = ""
-    for attr in [{"property": "og:image"}, {"name": "twitter:image"}]:
-        tag = soup.find("meta", attrs=attr)
-        if tag and tag.get("content"):
-            thumb = tag["content"]
-            break
-
-    date = ""
-    for attr in [{"property": "article:published_time"}, {"name": "pubdate"}, {"name": "date"}]:
-        tag = soup.find("meta", attrs=attr)
-        if tag and tag.get("content"):
-            date = format_date(tag["content"])
-            break
-
-    return {"link": link, "title": title, "description": desc, "thumb": thumb, "date": date}
-
-# -------------------------------
-# Load last 50 links
-# -------------------------------
-with open(INPUT_FILE) as f:
+with open(POSTED_FILE, encoding="utf-8") as f:
     all_links = [line.strip() for line in f.readlines() if line.strip()]
 
 last50_links = all_links[-50:]
 
 # -------------------------------
-# Fetch metadata for similarity
+# Get metadata from parsed.csv
 # -------------------------------
-meta_list = [fetch_meta(link) for link in last50_links]
+meta_list = []
+for link in last50_links:
+    meta = parsed_dict.get(link, {"title": link, "description": "", "thumb": "", "date": ""})
+    meta["link"] = link
+    meta_list.append(meta)
 
+# -------------------------------
 # TF-IDF using capitalized words
+# -------------------------------
 texts = [capitalized_words(m["title"] + " " + m["description"]) for m in meta_list]
 vectorizer = TfidfVectorizer()
 tfidf_matrix = vectorizer.fit_transform(texts)
@@ -144,7 +94,7 @@ for _ in range(10):
     # Sort cluster by published date descending
     def date_key(a):
         try:
-            return parser.parse(a["date"])
+            return parser.parse(a.get("date", "1900-01-01"))
         except:
             return parser.parse("1900-01-01")
     cluster_articles.sort(key=date_key, reverse=True)
@@ -156,15 +106,6 @@ for _ in range(10):
     # Remove processed indices
     to_remove = [remaining_indices.index(meta_list.index(a)) for a in cluster_articles]
     remaining_indices = [idx for i, idx in enumerate(remaining_indices) if i not in to_remove]
-
-# -------------------------------
-# Enrich main + similar links for HTML
-# -------------------------------
-final_clusters = []
-for cluster in clusters:
-    all_articles = [cluster["main"]] + cluster["similar"]
-    enriched = [enrich_full(a["link"]) for a in all_articles]
-    final_clusters.append(enriched)
 
 # -------------------------------
 # Generate HTML
@@ -190,12 +131,12 @@ html = """
 <h1 class="mb-4">LinksFilter</h1>
 """
 
-for cluster in final_clusters:
-    main = cluster[0]
-    others = cluster[1:]
+for cluster in clusters:
+    main = cluster["main"]
+    others = cluster["similar"]
 
     img_html = f'<img src="{main["thumb"]}" class="card-img-top" alt="">' if main["thumb"] else ""
-    date_html = f'<div class="card-date">{main["date"]}</div>' if main["date"] else ""
+    date_html = f'<div class="card-date">{format_date(main["date"])}</div>' if main.get("date") else ""
 
     html += f"""
     <div class="card shadow-sm">
@@ -210,7 +151,7 @@ for cluster in final_clusters:
     for o in others:
         domain_long = urlparse(o["link"]).netloc
         domain = '.'.join(domain_long.split('.')[-2:])
-        date_o = f', {o["date"]}' if o["date"] else ""
+        date_o = f', {format_date(o["date"])}' if o.get("date") else ""
         html += f'<a href="{o["link"]}" target="_blank">{o["title"]} ({domain}{date_o})</a>'
 
     html += """
