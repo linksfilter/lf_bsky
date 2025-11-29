@@ -42,6 +42,7 @@ jobs:
             ACCESS_TOKEN_SECRET: ${{ secrets.TW_ACCESS_TOKEN_SECRET }}
         run: |
              python linksfilter.py
+             python website.py
 
       - name: Check for changes and commit
         uses: stefanzweifel/git-auto-commit-action@v4
