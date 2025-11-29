@@ -50,7 +50,7 @@ with open(PARSED_FILE, encoding="utf-8") as f:
 with open(POSTED_FILE, encoding="utf-8") as f:
     all_links = [line.strip() for line in f.readlines() if line.strip()]
 
-last50_links = all_links[-50:]
+last50_links = reversed(all_links[-50:])
 
 # -------------------------------
 # Get metadata from parsed.csv
