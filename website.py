@@ -1,134 +1,120 @@
+import pandas as pd
 import requests
-from newspaper import Article, Config
+from pathlib import Path
 
-INPUT_FILE = "posted.csv"
-OUTPUT_FILE = "docs/index.html"
+# -----------------------------
+# Paths
+# -----------------------------
+LINKS_CSV = "links.csv"        # file containing your last 10 links
+OUTPUT_HTML = "index.html"
 
-
-# -----------------------------------------------------
-# Simple metadata enrichment using Newspaper3k
-# -----------------------------------------------------
-def enrich(link):
-    config = Config()
-    config.request_timeout = 10
-
+# -----------------------------
+# Enrich links function
+# -----------------------------
+def enrich_link(link):
+    """
+    Fetch basic metadata for a link: title, description, and image (if any)
+    Uses OpenGraph or defaults.
+    """
     try:
-        article = Article(link, config=config)
-        article.download()
-        article.parse()
+        resp = requests.get(link, timeout=5)
+        resp.raise_for_status()
+        html = resp.text
+
+        # Simple title extraction
+        import re
+        title_match = re.search(r'<title>(.*?)</title>', html, re.IGNORECASE)
+        title = title_match.group(1) if title_match else link
+
+        # Simple description extraction from meta tag
+        desc_match = re.search(r'<meta name="description" content="(.*?)"', html, re.IGNORECASE)
+        description = desc_match.group(1) if desc_match else title
+
+        # Try to find og:image
+        img_match = re.search(r'<meta property="og:image" content="(.*?)"', html, re.IGNORECASE)
+        image = img_match.group(1) if img_match else None
+
+        return title, description, image
     except:
-        return {
-            "title": link,
-            "description": "",
-            "thumb": "",
-            "link": link
-        }
+        return link, link, None
 
-    title = article.title or link
-    desc = article.meta_description or ""
+# -----------------------------
+# Load links
+# -----------------------------
+df = pd.read_csv(LINKS_CSV, header=None, names=["link"])
+df = df.tail(10)  # last 10 links
 
-    thumb = ""
-    try:
-        if getattr(article, "meta_img", ""):
-            thumb = article.meta_img
-    except:
-        thumb = ""
+# Enrich links
+enriched = []
+for link in df["link"]:
+    title, desc, image = enrich_link(link)
+    enriched.append({"link": link, "title": title, "desc": desc, "image": image})
 
-    return {
-        "title": title,
-        "description": desc,
-        "thumb": thumb,
-        "link": link
-    }
-
-
-# -----------------------------------------------------
-# Load the first 10 links
-# -----------------------------------------------------
-with open(INPUT_FILE) as f:
-    all_links = [line.strip() for line in f.readlines() if line.strip()]
-
-links10 = all_links[:10]
-
-# Enrich each link
-items = [enrich(link) for link in links10]
-
-
-# -----------------------------------------------------
-# Build Bootstrap HTML (single column, big cards)
-# Whole card is clickable
-# -----------------------------------------------------
-html = """
-<!DOCTYPE html>
+# -----------------------------
+# Generate HTML
+# -----------------------------
+html = """<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Recent Links</title>
-
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-
+<title>Links</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 <style>
-.card {
-    transition: transform 0.1s ease;
-    border-radius: 12px;
-}
-.card:hover {
-    transform: scale(1.01);
-}
-.card-img-top {
-    object-fit: cover;
-    height: 260px; /* larger image */
-    border-radius: 12px 12px 0 0;
-}
-.card a {
+  body {
+    background-color: #f8f9fa;
+    padding: 2rem;
+  }
+  .link-card {
+    display: block;
+    width: 50%;
+    margin: 1rem auto;
+    aspect-ratio: 3 / 2;
+    overflow: hidden;
     text-decoration: none;
     color: inherit;
-}
+  }
+  .link-card .card-img-top {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .link-card .card-body {
+    padding: 0.5rem;
+  }
+  @media (max-width: 768px) {
+    .link-card {
+      width: 90%;
+    }
+  }
 </style>
-
 </head>
-<body class="bg-light">
-
-<div class="container py-5" style="max-width: 700px;">
-<h1 class="mb-4">Most Recent Links</h1>
-<div class="row g-4">
+<body>
+<h1 class="text-center mb-4">Latest Links</h1>
 """
 
-for item in items:
-    title = item["title"]
-    desc = item["description"]
-    link = item["link"]
-    thumb = item["thumb"]
-
-    img_html = f'<img src="{thumb}" class="card-img-top" alt="">' if thumb else ""
-
+# Add cards
+for item in enriched:
+    img_html = f'<img src="{item["image"]}" class="card-img-top">' if item["image"] else ""
     html += f"""
-    <div class="col-12">
-      <a href="{link}" target="_blank">
-        <div class="card shadow-sm">
-          {img_html}
-          <div class="card-body">
-            <h4 class="card-title">{title}</h4>
-            <p class="card-text">{desc}</p>
-          </div>
-        </div>
-      </a>
+<a href="{item['link']}" target="_blank" class="link-card">
+  <div class="card shadow-sm">
+    {img_html}
+    <div class="card-body">
+      <h4 class="card-title">{item['title']}</h4>
+      <p class="card-text">{item['desc']}</p>
     </div>
-    """
+  </div>
+</a>
+"""
 
 html += """
-</div>
-</div>
-
 </body>
 </html>
 """
 
-# -----------------------------------------------------
-# Save HTML file
-# -----------------------------------------------------
-with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
-    f.write(html)
-
-print("Website generated:", OUTPUT_FILE)
+# -----------------------------
+# Save HTML
+# -----------------------------
+Path(OUTPUT_HTML).write_text(html, encoding="utf-8")
+print(f"HTML page generated at {OUTPUT_HTML}")
