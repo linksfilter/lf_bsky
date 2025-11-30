@@ -7,167 +7,313 @@
 <title>LinksFilter</title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 <style>
-.card { margin-bottom: 1rem; border-radius: 12px; }
-.card-img-top { object-fit: cover; height: 200px; border-radius: 12px 12px 0 0; }
-.similar-links a { display: block; font-size: 0.9rem; margin-bottom: 0.25rem; }
-.card-date { font-size: 0.85rem; color: gray; margin-bottom: 0.5rem; }
-.domain { font-size: 0.8rem; color: #777; margin-left: 0.3rem; }
+
+:root {
+    --primary-color: #D95BF5; /* vibrant purple-pink */
+}
+
+h1,
+.card-title,
+.similar-links a,
+.card-img-top {
+    color: var(--primary-color);
+    /* For images, you can add a subtle border or shadow in this color if needed */
+}
+
+/* Optional: hover effect */
+.card-link-wrapper:hover .card-title,
+.similar-links a:hover {
+    text-decoration: underline;
+    color: #F57BBF; /* slightly lighter pink for hover */
+}
+
+.card-link-wrapper {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    margin-bottom: 1rem;
+    border-radius: 0.25rem;
+}
+
+.card-link-wrapper:hover {
+    cursor: pointer;
+}
+
+.card-img-top {
+    width: 100%;
+    aspect-ratio: 2 / 1; /* 3:2 ratio */
+    object-fit: cover;    /* crop or fill to fit */
+    border-radius: 0.25rem 0.25rem 0 0;
+}
+
+.card-body {
+    padding: 1rem;
+}
+
+.card-title {
+    margin-bottom: 0.5rem;
+    font-size: 1.25rem;
+    text-decoration: none;
+}
+
+.card-link-wrapper:hover .card-title {
+    text-decoration: underline;
+}
+
+.card-date {
+    font-size: 0.85rem;
+    color: gray;
+    margin-bottom: 0.5rem;
+}
+
+.card-img-wrapper {
+    position: relative;
+    width: 100%;
+    padding-top: 50%; /* 3:2 aspect ratio */
+    overflow: hidden;
+    border-radius: 0.25rem 0.25rem 0 0;
+    filter: saturate(25%); /* slight desaturation */
+}
+
+.card-img-wrapper img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+/* Tint overlay */
+.card-img-wrapper::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: var(--primary-color);
+    opacity: 0.25; /* adjust intensity of tint */
+    pointer-events: none; /* so the link is still clickable */
+}
+
+.keywords {
+    font-size: 0.85rem;
+    color: #444;
+    margin-bottom: 0.5rem;
+}
+
+.similar-links a {
+    display: block;
+    font-size: 0.9rem;
+    margin-bottom: 0.25rem;
+    text-decoration: none;
+    color: #007bff;
+}
+
+.similar-links a:hover {
+    text-decoration: underline;
+}
 </style>
 </head>
 <body class="bg-light">
 <div class="container py-5" style="max-width: 800px;">
 <h1 class="mb-4">LinksFilter</h1>
+<div class="row g-3"> <!-- g-3 adds spacing between cards -->
 
-    <div class="card shadow-sm">
-      <img src="https://cdn.bsky.app/img/feed_thumbnail/plain/did:plc:zorx72vm56gtgv4hzl66q4zm/bafkreiacyo6tclkb3e3zsu36f5lhw7uijoc62lir5tdi6xnqrg2v2fxxru@jpeg" class="card-img-top" alt="">
-      <div class="card-body">
-        <h4 class="card-title">
-            <a href="https://taz.de/Gruendung-Generation-Deutschland/!6133527/" target="_blank">Gründung „Generation Deutschland“: Rechtsextreme AfD-Jugendorganisation hat jetzt neuen Namen</a>
-        </h4>
-        <div class="card-date">taz.de | 29.11.2025</div>
-        <p class="card-text">Die Gründung der AfD-Jugend war ein extrem rechter Offenbarungseid. Und zwar auch der Mutterpartei. Immerhin gab es laute und widerständige Proteste.</p>
-        <div class="keywords mb-2" style="font-size:0.85rem; color:#444;">deutschland • generation • jugend</div>
-        <div class="similar-links">
+    <div class="col-12">
+    <a href="https://taz.de/Gruendung-Generation-Deutschland/!6133527/" target="_blank" class="card-link-wrapper">
+      <div class="card shadow-sm mb-3">
+        <div class="card-img-wrapper">
+        <img src="https://cdn.bsky.app/img/feed_thumbnail/plain/did:plc:zorx72vm56gtgv4hzl66q4zm/bafkreiacyo6tclkb3e3zsu36f5lhw7uijoc62lir5tdi6xnqrg2v2fxxru@jpeg" class="card-img-top" alt="">
+        </div>
+        <div class="card-body">
+          <h4 class="card-title">Gründung „Generation Deutschland“: Rechtsextreme AfD-Jugendorganisation hat jetzt neuen Namen</h4>
+          <div class="card-date">taz.de | 29.11.2025</div>
+          <p class="card-text">Die Gründung der AfD-Jugend war ein extrem rechter Offenbarungseid. Und zwar auch der Mutterpartei. Immerhin gab es laute und widerständige Proteste.</p>
+          <div class="keywords">deutschland • generation • jugend</div>
+          <div class="similar-links">
     <a href="https://www.spiegel.de/politik/deutschland/neue-afd-jugend-generation-deutschland-applaus-fuers-voelkische-a-bd816e1d-265f-4195-8c60-2f1b38c8a87a" target="_blank">Neue AfD-Jugend Generation Deutschland: Applaus fürs Völkische (spiegel.de)</a><a href="https://www.fr.de/hessen/afd-gruendungskongress-der-ausnahmezustand-in-giessen-beginnt-um-uhr-zr-94060946.html" target="_blank">AfD-Jugend-Gründung in Gießen: Demo-Teilnehmer eingekesselt – Polizei fürchtet Durchbruch an Brücke (fr.de)</a><a href="https://www.nd-aktuell.de/artikel/1195796.generation-deutschland-afd-jugend-nationalistische-kaderschmiede.html" target="_blank">AfD-Jugend: Nationalistische Kaderschmiede (nd-aktuell.de)</a>
+            </div>
         </div>
-      </div>
+        </div>
+    </a>
     </div>
     
-    <div class="card shadow-sm">
-      <img src="https://cdn.bsky.app/img/feed_thumbnail/plain/did:plc:xjw5wikjhxxf3hlpv7cvjbhp/bafkreiffqw63ltxzqr36xc5iccw36auymcug4w34y67syweztygmgnefyq@jpeg" class="card-img-top" alt="">
-      <div class="card-body">
-        <h4 class="card-title">
-            <a href="https://www.sueddeutsche.de/medien/wolfram-weimer-mediengruppe-weimer-media-group-wmg-kritik-li.3343791" target="_blank">Weimer Media Group: Die potemkinsche Mediengruppe des Kulturstaatsministers</a>
-        </h4>
-        <div class="card-date">sueddeutsche.de | 28.11.2025</div>
-        <p class="card-text">16 Magazine, Agenturen und Verlage gehören nach eigenen Angaben zur WMG. Ein Blick hinter die Fassade lässt dieses Gebilde in sich zusammenfallen</p>
-        <div class="keywords mb-2" style="font-size:0.85rem; color:#444;">fassade • gebilde • group</div>
-        <div class="similar-links">
-    
+    <div class="col-md-6">
+    <a href="https://www.sueddeutsche.de/medien/wolfram-weimer-mediengruppe-weimer-media-group-wmg-kritik-li.3343791" target="_blank" class="card-link-wrapper">
+      <div class="card shadow-sm mb-3">
+        <div class="card-img-wrapper">
+        <img src="https://cdn.bsky.app/img/feed_thumbnail/plain/did:plc:xjw5wikjhxxf3hlpv7cvjbhp/bafkreiffqw63ltxzqr36xc5iccw36auymcug4w34y67syweztygmgnefyq@jpeg" class="card-img-top" alt="">
         </div>
-      </div>
+        <div class="card-body">
+          <h4 class="card-title">Weimer Media Group: Die potemkinsche Mediengruppe des Kulturstaatsministers</h4>
+          <div class="card-date">sueddeutsche.de | 28.11.2025</div>
+          <p class="card-text">16 Magazine, Agenturen und Verlage gehören nach eigenen Angaben zur WMG. Ein Blick hinter die Fassade lässt dieses Gebilde in sich zusammenfallen</p>
+          <div class="keywords">fassade • gebilde • group</div>
+          <div class="similar-links">
+    
+            </div>
+        </div>
+        </div>
+    </a>
     </div>
     
-    <div class="card shadow-sm">
-      <img src="https://cdn.bsky.app/img/feed_thumbnail/plain/did:plc:fd5ikg66mtapnil47qyazurx/bafkreiaf37fx4joxgb2nz5iveytij5ykftfcsnsymxdxlydifsq2fwp52i@jpeg" class="card-img-top" alt="">
-      <div class="card-body">
-        <h4 class="card-title">
-            <a href="https://taz.de/Lobbyorganisation-Elnet/!6130001/" target="_blank">Lobbyorganisation Elnet: Meinungs­bildungsreisen nach Israel</a>
-        </h4>
-        <div class="card-date">taz.de | 29.11.2025</div>
-        <p class="card-text">Elnet lobbyiert für die Regierung Netanjahu. Über hundert deutsche Abgeordnete reisten mit dem Verein, der Kontakt zu Siedlern und Trump-Fans hat.</p>
-        <div class="keywords mb-2" style="font-size:0.85rem; color:#444;">elnet • abgeordnete • fans</div>
-        <div class="similar-links">
-    
+    <div class="col-md-6">
+    <a href="https://taz.de/Lobbyorganisation-Elnet/!6130001/" target="_blank" class="card-link-wrapper">
+      <div class="card shadow-sm mb-3">
+        <div class="card-img-wrapper">
+        <img src="https://cdn.bsky.app/img/feed_thumbnail/plain/did:plc:fd5ikg66mtapnil47qyazurx/bafkreiaf37fx4joxgb2nz5iveytij5ykftfcsnsymxdxlydifsq2fwp52i@jpeg" class="card-img-top" alt="">
         </div>
-      </div>
+        <div class="card-body">
+          <h4 class="card-title">Lobbyorganisation Elnet: Meinungs­bildungsreisen nach Israel</h4>
+          <div class="card-date">taz.de | 29.11.2025</div>
+          <p class="card-text">Elnet lobbyiert für die Regierung Netanjahu. Über hundert deutsche Abgeordnete reisten mit dem Verein, der Kontakt zu Siedlern und Trump-Fans hat.</p>
+          <div class="keywords">elnet • abgeordnete • fans</div>
+          <div class="similar-links">
+    
+            </div>
+        </div>
+        </div>
+    </a>
     </div>
     
-    <div class="card shadow-sm">
-      <img src="https://cdn.bsky.app/img/feed_thumbnail/plain/did:plc:7m55xphdksg5l4kntnino534/bafkreieye5fm5pybnsujng2wibq25hwhj3ugw3qiqishb5m62ssrg3jeyi@jpeg" class="card-img-top" alt="">
-      <div class="card-body">
-        <h4 class="card-title">
-            <a href="https://www.zeit.de/politik/deutschland/2025-11/giessen-afd-jugend-alexander-dobrindt-kritisiert-demonstrierende-gxe" target="_blank">Proteste gegen AfD-Jugend: Friedrich Merz kritisiert Auseinandersetzungen bei Protesten in Gießen</a>
-        </h4>
-        <div class="card-date">zeit.de | 30.11.2025</div>
-        <p class="card-text">Bundeskanzler Merz und Bundesinnenminister Dobrindt haben die Auseinandersetzungen bei Protesten gegen die AfD-Jugend in Gießen kritisiert. Dobrindt sprach von "Chaoten".</p>
-        <div class="keywords mb-2" style="font-size:0.85rem; color:#444;">gießen • jugend • proteste</div>
-        <div class="similar-links">
+    <div class="col-12">
+    <a href="https://www.zeit.de/politik/deutschland/2025-11/giessen-afd-jugend-alexander-dobrindt-kritisiert-demonstrierende-gxe" target="_blank" class="card-link-wrapper">
+      <div class="card shadow-sm mb-3">
+        <div class="card-img-wrapper">
+        <img src="https://cdn.bsky.app/img/feed_thumbnail/plain/did:plc:7m55xphdksg5l4kntnino534/bafkreieye5fm5pybnsujng2wibq25hwhj3ugw3qiqishb5m62ssrg3jeyi@jpeg" class="card-img-top" alt="">
+        </div>
+        <div class="card-body">
+          <h4 class="card-title">Proteste gegen AfD-Jugend: Friedrich Merz kritisiert Auseinandersetzungen bei Protesten in Gießen</h4>
+          <div class="card-date">zeit.de | 30.11.2025</div>
+          <p class="card-text">Bundeskanzler Merz und Bundesinnenminister Dobrindt haben die Auseinandersetzungen bei Protesten gegen die AfD-Jugend in Gießen kritisiert. Dobrindt sprach von "Chaoten".</p>
+          <div class="keywords">gießen • jugend • proteste</div>
+          <div class="similar-links">
     <a href="https://taz.de/Neugruendung-der-AfD-Jugend-in-Giessen/!6132815/" target="_blank">Neugründung der AfD-Jugend in Gießen: Bündnis widersetzt sich Aufmarsch der Höcke-Jugend (taz.de)</a><a href="https://netzpolitik.org/2025/proteste-gegen-afd-jugend-stadt-giessen-will-demoverbotszone-vor-gericht-durchsetzen/" target="_blank">Proteste gegen AfD-Jugend: Stadt Gießen will Demoverbotszone vor Gericht durchsetzen (netzpolitik.org)</a>
+            </div>
         </div>
-      </div>
+        </div>
+    </a>
     </div>
     
-    <div class="card shadow-sm">
-      
-      <div class="card-body">
-        <h4 class="card-title">
-            <a href="https://www1.wdr.de/nachrichten/landespolitik/debatte-um-afd-verbot-100.html" target="_blank">AfD-Verbot: Neue Debatte in der CDU</a>
-        </h4>
-        <div class="card-date">wdr.de</div>
-        <p class="card-text">Die CDA NRW drängt auf Prüfung eines AfD -Verbotsverfahrens und heizt eine eigentlich abgeschlossene Debatte in der Partei neu an.</p>
-        <div class="keywords mb-2" style="font-size:0.85rem; color:#444;">prüfung • verbot • verbotsverfahrens</div>
-        <div class="similar-links">
-    
+    <div class="col-md-6">
+    <a href="https://www1.wdr.de/nachrichten/landespolitik/debatte-um-afd-verbot-100.html" target="_blank" class="card-link-wrapper">
+      <div class="card shadow-sm mb-3">
+        <div class="card-img-wrapper">
+        
         </div>
-      </div>
+        <div class="card-body">
+          <h4 class="card-title">AfD-Verbot: Neue Debatte in der CDU</h4>
+          <div class="card-date">wdr.de</div>
+          <p class="card-text">Die CDA NRW drängt auf Prüfung eines AfD -Verbotsverfahrens und heizt eine eigentlich abgeschlossene Debatte in der Partei neu an.</p>
+          <div class="keywords">prüfung • verbot • verbotsverfahrens</div>
+          <div class="similar-links">
+    
+            </div>
+        </div>
+        </div>
+    </a>
     </div>
     
-    <div class="card shadow-sm">
-      <img src="https://cdn.bsky.app/img/feed_thumbnail/plain/did:plc:wixagufvwfntqcf6aw6p5bpt/bafkreiensjcfooutqmrugt2pzgmankg77tzrluveowo3bapalmtgvpgvaa@jpeg" class="card-img-top" alt="">
-      <div class="card-body">
-        <h4 class="card-title">
-            <a href="https://www.derstandard.at/story/3000000297504/seitenwechsel-wie-die-extreme-rechte-literaturpolitik-betreibt" target="_blank">"Seitenwechsel": Wie die (extreme) Rechte Literaturpolitik betreibt</a>
-        </h4>
-        <div class="card-date">derstandard.at</div>
-        <p class="card-text">Ein Blick auf Netzwerke, Narrative und Mobilisierungsstrategien der (extremen) Rechten</p>
-        <div class="keywords mb-2" style="font-size:0.85rem; color:#444;">literaturpolitik • mobilisierungsstrategien • narrative</div>
-        <div class="similar-links">
-    
+    <div class="col-md-6">
+    <a href="https://www.derstandard.at/story/3000000297504/seitenwechsel-wie-die-extreme-rechte-literaturpolitik-betreibt" target="_blank" class="card-link-wrapper">
+      <div class="card shadow-sm mb-3">
+        <div class="card-img-wrapper">
+        <img src="https://cdn.bsky.app/img/feed_thumbnail/plain/did:plc:wixagufvwfntqcf6aw6p5bpt/bafkreiensjcfooutqmrugt2pzgmankg77tzrluveowo3bapalmtgvpgvaa@jpeg" class="card-img-top" alt="">
         </div>
-      </div>
+        <div class="card-body">
+          <h4 class="card-title">"Seitenwechsel": Wie die (extreme) Rechte Literaturpolitik betreibt</h4>
+          <div class="card-date">derstandard.at</div>
+          <p class="card-text">Ein Blick auf Netzwerke, Narrative und Mobilisierungsstrategien der (extremen) Rechten</p>
+          <div class="keywords">literaturpolitik • mobilisierungsstrategien • narrative</div>
+          <div class="similar-links">
+    
+            </div>
+        </div>
+        </div>
+    </a>
     </div>
     
-    <div class="card shadow-sm">
-      <img src="https://cdn.bsky.app/img/feed_thumbnail/plain/did:plc:zorx72vm56gtgv4hzl66q4zm/bafkreihiggeb7w73ma573wdvwhtznf3eljrgth2pf5uyhv6w56px4a5zli@jpeg" class="card-img-top" alt="">
-      <div class="card-body">
-        <h4 class="card-title">
-            <a href="https://taz.de/Blockierte-Heimat-Demo-in-Berlin/!6133522/" target="_blank">Blockierte „Heimat“-Demo in Berlin: Aufs falsche Hütchen gesetzt</a>
-        </h4>
-        <div class="card-date">taz.de | 29.11.2025</div>
-        <p class="card-text">Neonazis riefen zu einer antiziganistischen Demo gegen Hütchenspieler nach Mitte. Trotz der Proteste in Gießen, stellten sich 1.000 Antifas in den Weg.</p>
-        <div class="keywords mb-2" style="font-size:0.85rem; color:#444;">demo • antifas • aufs</div>
-        <div class="similar-links">
-    
+    <div class="col-md-6">
+    <a href="https://taz.de/Blockierte-Heimat-Demo-in-Berlin/!6133522/" target="_blank" class="card-link-wrapper">
+      <div class="card shadow-sm mb-3">
+        <div class="card-img-wrapper">
+        <img src="https://cdn.bsky.app/img/feed_thumbnail/plain/did:plc:zorx72vm56gtgv4hzl66q4zm/bafkreihiggeb7w73ma573wdvwhtznf3eljrgth2pf5uyhv6w56px4a5zli@jpeg" class="card-img-top" alt="">
         </div>
-      </div>
+        <div class="card-body">
+          <h4 class="card-title">Blockierte „Heimat“-Demo in Berlin: Aufs falsche Hütchen gesetzt</h4>
+          <div class="card-date">taz.de | 29.11.2025</div>
+          <p class="card-text">Neonazis riefen zu einer antiziganistischen Demo gegen Hütchenspieler nach Mitte. Trotz der Proteste in Gießen, stellten sich 1.000 Antifas in den Weg.</p>
+          <div class="keywords">demo • antifas • aufs</div>
+          <div class="similar-links">
+    
+            </div>
+        </div>
+        </div>
+    </a>
     </div>
     
-    <div class="card shadow-sm">
-      <img src="https://cdn.bsky.app/img/feed_thumbnail/plain/did:plc:lcahflphsnfsx7dmi6cyi5ty/bafkreifgnedihhuc35bkin3jqfxjy3tjoo6vgnta7e7xfqpjpuogk5xq3u@jpeg" class="card-img-top" alt="">
-      <div class="card-body">
-        <h4 class="card-title">
-            <a href="https://www.rbb-online.de/kontraste/archiv/20251127_2145/hat-die-linkspartei-ein-antisemitismus-problem.html" target="_blank">Drohungen gegen eigene Leute - Hat die Linkspartei ein Antisemitismus-Problem?</a>
-        </h4>
-        <div class="card-date">rbb-online.de</div>
-        <p class="card-text">Kürzlich fasste die Linksjugend "Solid" einen Beschluss, in dem Israel als „koloniales und rassistisches Staatsprojekt“ dargestellt wird. Die Parteispitze distanzierte sich, doch es ist nicht das erst...</p>
-        <div class="keywords mb-2" style="font-size:0.85rem; color:#444;">drohungen • kürzlich • leute</div>
-        <div class="similar-links">
-    
+    <div class="col-md-6">
+    <a href="https://www.rbb-online.de/kontraste/archiv/20251127_2145/hat-die-linkspartei-ein-antisemitismus-problem.html" target="_blank" class="card-link-wrapper">
+      <div class="card shadow-sm mb-3">
+        <div class="card-img-wrapper">
+        <img src="https://cdn.bsky.app/img/feed_thumbnail/plain/did:plc:lcahflphsnfsx7dmi6cyi5ty/bafkreifgnedihhuc35bkin3jqfxjy3tjoo6vgnta7e7xfqpjpuogk5xq3u@jpeg" class="card-img-top" alt="">
         </div>
-      </div>
+        <div class="card-body">
+          <h4 class="card-title">Drohungen gegen eigene Leute - Hat die Linkspartei ein Antisemitismus-Problem?</h4>
+          <div class="card-date">rbb-online.de</div>
+          <p class="card-text">Kürzlich fasste die Linksjugend "Solid" einen Beschluss, in dem Israel als „koloniales und rassistisches Staatsprojekt“ dargestellt wird. Die Parteispitze distanzierte sich, doch es ist nicht das erst...</p>
+          <div class="keywords">drohungen • kürzlich • leute</div>
+          <div class="similar-links">
+    
+            </div>
+        </div>
+        </div>
+    </a>
     </div>
     
-    <div class="card shadow-sm">
-      <img src="https://cdn.bsky.app/img/feed_thumbnail/plain/did:plc:bulrohn43vdsafgxzdw235mt/bafkreieeilubgl7amktfg45lae3x4zvgvczsy5zt7jxyxbe5u6emwkbcu4@jpeg" class="card-img-top" alt="">
-      <div class="card-body">
-        <h4 class="card-title">
-            <a href="https://taz.de/Die-Familienunternehmer/!6133060/" target="_blank">Die Familienunternehmer: Deutschlands gefährlichste Lobbyorganisation</a>
-        </h4>
-        <div class="card-date">taz.de | 28.11.2025</div>
-        <p class="card-text">Schon lange vor der Hinwendung zur AfD hat der Verband der Familienunternehmer Demokratie und Sozialstaat untergraben. Gut, dass nun hingeschaut wird.</p>
-        <div class="keywords mb-2" style="font-size:0.85rem; color:#444;">familienunternehmer • verband • demokratie</div>
-        <div class="similar-links">
+    <div class="col-12">
+    <a href="https://taz.de/Die-Familienunternehmer/!6133060/" target="_blank" class="card-link-wrapper">
+      <div class="card shadow-sm mb-3">
+        <div class="card-img-wrapper">
+        <img src="https://cdn.bsky.app/img/feed_thumbnail/plain/did:plc:bulrohn43vdsafgxzdw235mt/bafkreieeilubgl7amktfg45lae3x4zvgvczsy5zt7jxyxbe5u6emwkbcu4@jpeg" class="card-img-top" alt="">
+        </div>
+        <div class="card-body">
+          <h4 class="card-title">Die Familienunternehmer: Deutschlands gefährlichste Lobbyorganisation</h4>
+          <div class="card-date">taz.de | 28.11.2025</div>
+          <p class="card-text">Schon lange vor der Hinwendung zur AfD hat der Verband der Familienunternehmer Demokratie und Sozialstaat untergraben. Gut, dass nun hingeschaut wird.</p>
+          <div class="keywords">familienunternehmer • verband • demokratie</div>
+          <div class="similar-links">
     <a href="https://taz.de/Aktivist-ueber-Familienunternehmer/!6133008/" target="_blank">Aktivist über Familienunternehmer: „Das ist oligarchisch“ (taz.de, 27.11.2025)</a><a href="https://www.rnd.de/politik/die-familienunternehmer-wer-ist-der-verband-der-seine-brandmauer-zur-afd-abgeschafft-hat-XN3XGUCWU5E5FLDD45OPRCOPMU.html" target="_blank">Die Familienunternehmer: Wer ist der Verband, der seine Brandmauer zur AfD abgeschafft hat? (rnd.de)</a><a href="https://www.t-online.de/nachrichten/deutschland/innenpolitik/id_101019686/afd-debatte-auch-fritz-kola-verlaesst-verband-der-familienunternehmer.html" target="_blank">AfD-Debatte: Auch Fritz-Kola verlässt Verband der Familienunternehmer (t-online.de)</a>
+            </div>
         </div>
-      </div>
+        </div>
+    </a>
     </div>
     
-    <div class="card shadow-sm">
-      <img src="https://cdn.bsky.app/img/feed_thumbnail/plain/did:plc:zorx72vm56gtgv4hzl66q4zm/bafkreibhiapq6v43x6otfnex644ohzurppatlv7lybke57tobukyjqrm7u@jpeg" class="card-img-top" alt="">
-      <div class="card-body">
-        <h4 class="card-title">
-            <a href="https://taz.de/-AfD-Jugend-und-Gegenprotest-/!6133377/" target="_blank">+++ AfD-Jugend und Protest +++: Blockaden verzögern Beginn von AfD-Kongress</a>
-        </h4>
-        <div class="card-date">taz.de | 29.11.2025</div>
-        <p class="card-text">In Gießen will sich heute eine neue AfD-Jugend gründen. Tausende Antifaschist:innen demonstrieren dagegen, die Polizei setzt Gewalt ein.</p>
-        <div class="keywords mb-2" style="font-size:0.85rem; color:#444;">gewalt • protest • gießen</div>
-        <div class="similar-links">
+    <div class="col-12">
+    <a href="https://taz.de/-AfD-Jugend-und-Gegenprotest-/!6133377/" target="_blank" class="card-link-wrapper">
+      <div class="card shadow-sm mb-3">
+        <div class="card-img-wrapper">
+        <img src="https://cdn.bsky.app/img/feed_thumbnail/plain/did:plc:zorx72vm56gtgv4hzl66q4zm/bafkreibhiapq6v43x6otfnex644ohzurppatlv7lybke57tobukyjqrm7u@jpeg" class="card-img-top" alt="">
+        </div>
+        <div class="card-body">
+          <h4 class="card-title">+++ AfD-Jugend und Protest +++: Blockaden verzögern Beginn von AfD-Kongress</h4>
+          <div class="card-date">taz.de | 29.11.2025</div>
+          <p class="card-text">In Gießen will sich heute eine neue AfD-Jugend gründen. Tausende Antifaschist:innen demonstrieren dagegen, die Polizei setzt Gewalt ein.</p>
+          <div class="keywords">gewalt • protest • gießen</div>
+          <div class="similar-links">
     <a href="https://www.nd-aktuell.de/artikel/1195817.proteste-gegen-den-afd-jugendverband-grundlos-panik-in-giessen.html" target="_blank">Grundlos Panik in Gießen (nd-aktuell.de)</a>
+            </div>
         </div>
-      </div>
+        </div>
+    </a>
     </div>
     
+</div>
 </div>
 </body>
 </html>

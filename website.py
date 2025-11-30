@@ -162,16 +162,121 @@ html = """
 <title>LinksFilter</title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 <style>
-.card { margin-bottom: 1rem; border-radius: 12px; }
-.card-img-top { object-fit: cover; height: 200px; border-radius: 12px 12px 0 0; }
-.similar-links a { display: block; font-size: 0.9rem; margin-bottom: 0.25rem; }
-.card-date { font-size: 0.85rem; color: gray; margin-bottom: 0.5rem; }
-.domain { font-size: 0.8rem; color: #777; margin-left: 0.3rem; }
+
+:root {
+    --primary-color: #D95BF5; /* vibrant purple-pink */
+}
+
+h1,
+.card-title,
+.similar-links a,
+.card-img-top {
+    color: var(--primary-color);
+    /* For images, you can add a subtle border or shadow in this color if needed */
+}
+
+/* Optional: hover effect */
+.card-link-wrapper:hover .card-title,
+.similar-links a:hover {
+    text-decoration: underline;
+    color: #F57BBF; /* slightly lighter pink for hover */
+}
+
+.card-link-wrapper {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    margin-bottom: 1rem;
+    border-radius: 0.25rem;
+}
+
+.card-link-wrapper:hover {
+    cursor: pointer;
+}
+
+.card-img-top {
+    width: 100%;
+    aspect-ratio: 2 / 1; /* 3:2 ratio */
+    object-fit: cover;    /* crop or fill to fit */
+    border-radius: 0.25rem 0.25rem 0 0;
+}
+
+.card-body {
+    padding: 1rem;
+}
+
+.card-title {
+    margin-bottom: 0.5rem;
+    font-size: 1.25rem;
+    text-decoration: none;
+}
+
+.card-link-wrapper:hover .card-title {
+    text-decoration: underline;
+}
+
+.card-date {
+    font-size: 0.85rem;
+    color: gray;
+    margin-bottom: 0.5rem;
+}
+
+.card-img-wrapper {
+    position: relative;
+    width: 100%;
+    padding-top: 50%; /* 3:2 aspect ratio */
+    overflow: hidden;
+    border-radius: 0.25rem 0.25rem 0 0;
+    filter: saturate(25%); /* slight desaturation */
+}
+
+.card-img-wrapper img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+/* Tint overlay */
+.card-img-wrapper::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: var(--primary-color);
+    opacity: 0.25; /* adjust intensity of tint */
+    pointer-events: none; /* so the link is still clickable */
+}
+
+.keywords {
+    font-size: 0.85rem;
+    color: #444;
+    margin-bottom: 0.5rem;
+}
+
+.similar-links a {
+    display: block;
+    font-size: 0.9rem;
+    margin-bottom: 0.25rem;
+    text-decoration: none;
+    color: #007bff;
+}
+
+.similar-links a:hover {
+    text-decoration: underline;
+}
 </style>
 </head>
 <body class="bg-light">
 <div class="container py-5" style="max-width: 800px;">
 <h1 class="mb-4">LinksFilter</h1>
+<div class="row g-3"> <!-- g-3 adds spacing between cards -->
 """
 
 for cluster in clusters:
@@ -179,11 +284,10 @@ for cluster in clusters:
     others = cluster["similar"]
 
     img_html = f'<img src="{main["thumb"]}" class="card-img-top" alt="">' if main["thumb"] else ""
-    date_str = format_date(main["date"])
+    date_str = format_date(main.get("date", ""))
 
-    # Get domain of main link
+    # Domain and date
     main_domain = get_domain(main["link"])
-
     if main_domain and date_str:
         meta_html = f'<div class="card-date">{main_domain} | {date_str}</div>'
     elif main_domain:
@@ -193,40 +297,47 @@ for cluster in clusters:
     else:
         meta_html = ""
 
+    # Determine column width
+    if len(others) == 0:
+        col_class = "col-md-6"  # Half width for single cards
+    else:
+        col_class = "col-12"    # Full width for collection cards
+
+    # Keywords
     kw_html = ""
     if cluster["keywords"]:
-        kw_html = '<div class="keywords mb-2" style="font-size:0.85rem; color:#444;">' \
-                  + " • ".join(cluster["keywords"]) + "</div>"
-
-    # Get domain of main link
-    main_domain = get_domain(main["link"])
+        kw_html = '<div class="keywords">' + " • ".join(cluster["keywords"]) + "</div>"
 
     html += f"""
-    <div class="card shadow-sm">
-      {img_html}
-      <div class="card-body">
-        <h4 class="card-title">
-            <a href="{main["link"]}" target="_blank">{main["title"]}</a>
-        </h4>
-        {meta_html}
-        <p class="card-text">{main["description"]}</p>
-        {kw_html}
-        <div class="similar-links">
+    <div class="{col_class}">
+    <a href="{main['link']}" target="_blank" class="card-link-wrapper">
+      <div class="card shadow-sm mb-3">
+        <div class="card-img-wrapper">
+        {img_html}
+        </div>
+        <div class="card-body">
+          <h4 class="card-title">{main['title']}</h4>
+          {meta_html}
+          <p class="card-text">{main['description']}</p>
+          {kw_html}
+          <div class="similar-links">
     """
 
     for o in others:
-        domain_long = urlparse(o["link"]).netloc
-        domain = '.'.join(domain_long.split('.')[-2:])
+        domain_o = get_domain(o["link"])
         date_o = f', {format_date(o["date"])}' if o.get("date") else ""
-        html += f'<a href="{o["link"]}" target="_blank">{o["title"]} ({domain}{date_o})</a>'
+        html += f'<a href="{o["link"]}" target="_blank">{o["title"]} ({domain_o}{date_o})</a>'
 
     html += """
+            </div>
         </div>
-      </div>
+        </div>
+    </a>
     </div>
     """
 
 html += """
+</div>
 </div>
 </body>
 </html>
