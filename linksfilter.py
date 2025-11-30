@@ -109,7 +109,7 @@ def gen_link(start, end, uri):
     }
 
 def create_bsky_linkpost(title,description,link,image):
-    ''' Post into Bluesky 
+    ''' Post into Bluesky
     '''
     try:
         text = f"{description} {link}"
@@ -130,7 +130,7 @@ def create_bsky_linkpost(title,description,link,image):
             # Upload the image
             upload = BSKY_CLIENT.com.atproto.repo.upload_blob(img_data)
             thumb = upload.blob
-        
+
         # Create a link card embed
         embed_external = models.AppBskyEmbedExternal.Main(
             external=models.AppBskyEmbedExternal.External(
@@ -139,7 +139,7 @@ def create_bsky_linkpost(title,description,link,image):
                 uri=link,
                 thumb=thumb
             )
-        )   
+        )
 
         # Submit the post
         BSKY_CLIENT.com.atproto.repo.create_record(
@@ -147,8 +147,8 @@ def create_bsky_linkpost(title,description,link,image):
                 repo=BSKY_CLIENT.me.did,
                 collection='app.bsky.feed.post',
                 record=models.AppBskyFeedPost.Record(
-                createdAt=datetime.now(timezone.utc).replace(tzinfo=None).isoformat(timespec="milliseconds") + "Z", 
-                text=f"{description} {link}", 
+                createdAt=datetime.now(timezone.utc).replace(tzinfo=None).isoformat(timespec="milliseconds") + "Z",
+                text=f"{description} {link}",
                 embed=embed_external,
                 facets=facets
                 ),
@@ -193,28 +193,20 @@ def enrich_link_np(link):
     config = Config()
     config.request_timeout = 10
     try:
-      article = Article(link,config=config)
-      article.download()
-      article.parse()
-      article.canonical_link
-    except:
-      return 'error','error','error'
-    try:
-      title = article.title.replace('*',':')
-    except:
-      title = ''
-    try:
-      description = article.meta_description.replace('*',':')
-    except:
-      if title !='':
-        description = title
-      else:
-        description = ''
-    try:
-      new_link = article.canonical_link
-    except:
-      new_link = link
-    return title, description, new_link
+        article = Article(link, config=config)
+        article.download()
+        article.parse()
+        # Use canonical_link if available
+        new_link = article.canonical_link or link
+        # Extract title, description, and publish_date
+        title = article.title.replace('*', ':') if article.title else ''
+        description = article.meta_description.replace('*', ':') if article.meta_description else title
+        # Use publish_date if available
+        date = article.publish_date.strftime("%Y-%m-%d") if article.publish_date else ''
+    except Exception as e:
+        print(f"Error parsing {link}: {e}")
+        title, description, new_link, date = 'error', 'error', link, ''
+    return title, description, new_link, date
 
 @cache
 def enrich_link_og(link):
@@ -241,15 +233,12 @@ def enrich_link_og(link):
 
 @cache
 def enrich_link(link):
-  print(link)
-  title,description,new_link = enrich_link_np(link)
-  #if title == 'error':
-  #    print('Passing ' + link + ' to Opengraph parser')
-  #    title,description,new_link = enrich_link_og(link)
-  #if title == 'error':
-  #    print('Passing ' + link + ' to LeWagon parser')
-#   title,description,new_link = enrich_link_lw(link)
-  return title,description,new_link
+    print(link)
+    title, description, new_link, date = enrich_link_np(link)
+    # fallback parsers (optional)
+    # if title == 'error': title, description, new_link, date = enrich_link_og(link)
+    # if title == 'error': title, description, new_link, date = enrich_link_lw(link)
+    return title, description, new_link, date
 
 if __name__ == "__main__":
   #get bluesky timeline
@@ -283,7 +272,7 @@ if __name__ == "__main__":
   links_df['beschreibung'] =  links_df.apply(lambda x: x['description'] if x['beschreibung'] is None else x['titel'],axis=1)
 
   #update parsed data
-  NEW_PARSED = pd.concat([PARSED_DF,missing_links]).drop_duplicates(subset='uri').tail(10000)
+  NEW_PARSED = pd.concat([PARSED_DF, missing_links]).drop_duplicates(subset='uri').tail(10000)
   NEW_PARSED.to_csv(PARSED_PATH, index=False)
 
   #evaluate top links

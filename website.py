@@ -7,8 +7,24 @@ import re
 
 POSTED_FILE = "posted.csv"
 PARSED_FILE = "parsed.csv"
+STOPWORDS_FILE = "stopwords.csv"
 OUTPUT_FILE = "docs/index.html"
-SIM_THRESHOLD = 0.1  # similarity threshold for related links
+SIM_THRESHOLD = 0.2  # similarity threshold for related links
+
+# -------------------------------
+# Load stopwords from stopwords.csv
+# -------------------------------
+stopwords = []
+
+with open(STOPWORDS_FILE, encoding="utf-8") as f:
+    for line in f:
+        w = line.strip()
+        if w:
+            stopwords.append(w)
+
+def preprocess_stopwords(stopwords):
+    # lowercase all stopwords to match the vectorizer
+    return [w.lower() for w in stopwords]
 
 # -------------------------------
 # Format date to DD.MM.YYYY
@@ -28,6 +44,24 @@ def format_date(date_str):
 def capitalized_words(text):
     words = re.findall(r'\b[A-ZÄÖÜ][a-zäöüß]+\b', text)
     return " ".join(words)
+
+# -------------------------------
+# Extract top keywords from texts using the same TF-IDF model
+# -------------------------------
+def top_keywords(texts, vectorizer, top_n=3):
+    if not texts:
+        return []
+    tfidf = vectorizer.transform(texts)
+    summed = tfidf.sum(axis=0)        # sum scores across all cluster docs
+    words = vectorizer.get_feature_names_out()
+    scores = [(words[i], summed[0, i]) for i in range(len(words))]
+    scores = sorted(scores, key=lambda x: x[1], reverse=True)
+    return [w for w, s in scores[:top_n]]
+
+def get_domain(link):
+    domain_long = urlparse(link).netloc
+    # Keep only the last two parts (example.com)
+    return '.'.join(domain_long.split('.')[-2:])
 
 # -------------------------------
 # Load parsed.csv into a dict by link
@@ -65,7 +99,9 @@ for link in last50_links:
 # TF-IDF using capitalized words
 # -------------------------------
 texts = [capitalized_words(m["title"] + " " + m["description"]) for m in meta_list]
-vectorizer = TfidfVectorizer()
+vectorizer = TfidfVectorizer(
+    stop_words=preprocess_stopwords(stopwords)
+)
 tfidf_matrix = vectorizer.fit_transform(texts)
 cos_sim = cosine_similarity(tfidf_matrix)
 
@@ -101,7 +137,14 @@ for _ in range(10):
     main_article = cluster_articles[0]
     other_articles = cluster_articles[1:]
 
-    clusters.append({"main": main_article, "similar": other_articles})
+    # compute top keywords for cluster
+    cluster_texts = [
+        capitalized_words(a["title"] + " " + a["description"])
+        for a in cluster_articles
+    ]
+    keywords = top_keywords(cluster_texts, vectorizer, top_n=3)
+
+    clusters.append({"main": main_article, "similar": other_articles, "keywords": keywords})
 
     # Remove processed indices
     to_remove = [remaining_indices.index(meta_list.index(a)) for a in cluster_articles]
@@ -137,14 +180,25 @@ for cluster in clusters:
 
     img_html = f'<img src="{main["thumb"]}" class="card-img-top" alt="">' if main["thumb"] else ""
     date_html = f'<div class="card-date">{format_date(main["date"])}</div>' if main.get("date") else ""
+    kw_html = ""
+    if cluster["keywords"]:
+        kw_html = '<div class="keywords mb-2" style="font-size:0.85rem; color:#444;">' \
+                  + " • ".join(cluster["keywords"]) + "</div>"
+
+    # Get domain of main link
+    main_domain = get_domain(main["link"])
 
     html += f"""
     <div class="card shadow-sm">
       {img_html}
       <div class="card-body">
-        <h4 class="card-title"><a href="{main["link"]}" target="_blank">{main["title"]}</a></h4>
+        <h4 class="card-title">
+            <a href="{main["link"]}" target="_blank">{main["title"]}</a>
+            <span class="domain">({main_domain})</span>
+        </h4>
         {date_html}
         <p class="card-text">{main["description"]}</p>
+        {kw_html}
         <div class="similar-links">
     """
 
