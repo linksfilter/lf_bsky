@@ -42,9 +42,21 @@ except FileNotFoundError:
     discarded_keywords = set()
 
 # -------------------------------
-# Prepare a list to store all keywords for this run
+# Load existing keywords with display names
 # -------------------------------
 all_keywords = set()
+keyword_map = {}  # keyword -> display
+
+try:
+    with open(KEYWORDS_FILE, encoding="utf-8") as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            key = row["keyword"].strip().lower()
+            disp = row["display"].strip() if row.get("display") else key
+            if key:
+                keyword_map[key] = disp
+except FileNotFoundError:
+    keyword_map = {}
 
 # -------------------------------
 # Format date to DD.MM.YYYY
@@ -196,10 +208,29 @@ for cluster in clusters:
         meta_html = ""
     col_class = "col-md-6" if len(others) == 0 else "col-12"
 
-    filtered_keywords = [kw for kw in cluster["keywords"] if kw.lower() not in discarded_keywords]
-    cluster["keywords"] = filtered_keywords
-    all_keywords.update([kw.lower() for kw in cluster["keywords"]])
-    kw_html = '<div class="keywords">' + " • ".join(filtered_keywords) + "</div>" if filtered_keywords else ""
+# Filter discarded keywords
+    filtered = []
+    for kw in cluster["keywords"]:
+        base = kw.lower()
+        if base not in discarded_keywords:
+            filtered.append(kw)
+
+    cluster["keywords"] = filtered
+
+    # Collect for CSV + update keyword map
+    for kw in filtered:
+        base = kw.lower()
+        if base not in keyword_map:
+            # new keyword: default display = keyword itself
+            keyword_map[base] = kw
+        all_keywords.add(base)
+
+    # HTML keyword display values
+    kw_html = ""
+    if filtered:
+        display_list = [keyword_map[kw.lower()] for kw in filtered]
+        display_list = list(set(display_list))
+        kw_html = '<div class="keywords">' + " • ".join(display_list) + "</div>"
 
     cards_html += f"""
     <div class="{col_class}">
@@ -227,9 +258,10 @@ final_html = template_html.replace("{{content}}", cards_html)
 # Save all keywords to keywords.csv (overwrite each run)
 with open(KEYWORDS_FILE, "w", encoding="utf-8", newline="") as f:
     writer = csv.writer(f)
-    writer.writerow(["keyword"])
-    for kw in sorted(all_keywords):
-        writer.writerow([kw])
+    writer.writerow(["keyword", "display"])
+    for kw in keyword_map.keys():   # preserves original order + new-at-the-end
+        display = keyword_map[kw]
+        writer.writerow([kw, display])
 
 # Save HTML
 with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
