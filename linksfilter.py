@@ -263,7 +263,7 @@ if __name__ == "__main__":
   filled_links = links_df[links_df['link'].notna()].copy()
   missing_links = links_df[links_df['link'].isna()].copy()
   print(list(missing_links['uri'].unique()))
-  missing_links['titel'],missing_links['beschreibung'],missing_links['link'] = zip(*missing_links['uri'].progress_apply(enrich_link))
+  missing_links['titel'],missing_links['beschreibung'],missing_links['link'],missing_links['date'] = zip(*missing_links['uri'].progress_apply(enrich_link))
   links_df = pd.concat([filled_links,missing_links])
 
   #fill empty cells

@@ -179,7 +179,20 @@ for cluster in clusters:
     others = cluster["similar"]
 
     img_html = f'<img src="{main["thumb"]}" class="card-img-top" alt="">' if main["thumb"] else ""
-    date_html = f'<div class="card-date">{format_date(main["date"])}</div>' if main.get("date") else ""
+    date_str = format_date(main["date"])
+
+    # Get domain of main link
+    main_domain = get_domain(main["link"])
+
+    if main_domain and date_str:
+        meta_html = f'<div class="card-date">{main_domain} | {date_str}</div>'
+    elif main_domain:
+        meta_html = f'<div class="card-date">{main_domain}</div>'
+    elif date_str:
+        meta_html = f'<div class="card-date">{date_str}</div>'
+    else:
+        meta_html = ""
+
     kw_html = ""
     if cluster["keywords"]:
         kw_html = '<div class="keywords mb-2" style="font-size:0.85rem; color:#444;">' \
@@ -194,9 +207,8 @@ for cluster in clusters:
       <div class="card-body">
         <h4 class="card-title">
             <a href="{main["link"]}" target="_blank">{main["title"]}</a>
-            <span class="domain">({main_domain})</span>
         </h4>
-        {date_html}
+        {meta_html}
         <p class="card-text">{main["description"]}</p>
         {kw_html}
         <div class="similar-links">
