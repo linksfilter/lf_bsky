@@ -164,7 +164,8 @@ html = """
 <style>
 
 :root {
-    --primary-color: #D95BF5; /* vibrant purple-pink */
+    --primary-color: #D95BF5;
+    --hover-color: #B248C9;
 }
 
 h1,
@@ -172,14 +173,13 @@ h1,
 .similar-links a,
 .card-img-top {
     color: var(--primary-color);
-    /* For images, you can add a subtle border or shadow in this color if needed */
 }
 
 /* Optional: hover effect */
 .card-link-wrapper:hover .card-title,
 .similar-links a:hover {
     text-decoration: underline;
-    color: #F57BBF; /* slightly lighter pink for hover */
+    color: var(--hover-color);
 }
 
 .card-link-wrapper {
@@ -225,10 +225,10 @@ h1,
 .card-img-wrapper {
     position: relative;
     width: 100%;
-    padding-top: 50%; /* 3:2 aspect ratio */
+    padding-top: 50%;
     overflow: hidden;
     border-radius: 0.25rem 0.25rem 0 0;
-    filter: saturate(25%); /* slight desaturation */
+    filter: saturate(25%);
 }
 
 .card-img-wrapper img {
@@ -250,8 +250,8 @@ h1,
     width: 100%;
     height: 100%;
     background-color: var(--primary-color);
-    opacity: 0.25; /* adjust intensity of tint */
-    pointer-events: none; /* so the link is still clickable */
+    opacity: 0.25;
+    pointer-events: none;
 }
 
 .keywords {
@@ -265,18 +265,19 @@ h1,
     font-size: 0.9rem;
     margin-bottom: 0.25rem;
     text-decoration: none;
-    color: #007bff;
+    color: var(--primary-color);
 }
 
 .similar-links a:hover {
     text-decoration: underline;
+    color: var(--hover-color);
 }
 </style>
 </head>
 <body class="bg-light">
 <div class="container py-5" style="max-width: 800px;">
 <h1 class="mb-4">LinksFilter</h1>
-<div class="row g-3"> <!-- g-3 adds spacing between cards -->
+<div class="row g-3">
 """
 
 for cluster in clusters:
