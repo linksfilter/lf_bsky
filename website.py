@@ -8,6 +8,8 @@ import re
 POSTED_FILE = "posted.csv"
 PARSED_FILE = "parsed.csv"
 STOPWORDS_FILE = "stopwords.csv"
+DISCARDED_KEYWORDS_FILE = "discarded_keywords.csv"
+KEYWORDS_FILE = "keywords.csv"
 OUTPUT_FILE = "docs/index.html"
 SIM_THRESHOLD = 0.2  # similarity threshold for related links
 
@@ -25,6 +27,24 @@ with open(STOPWORDS_FILE, encoding="utf-8") as f:
 def preprocess_stopwords(stopwords):
     # lowercase all stopwords to match the vectorizer
     return [w.lower() for w in stopwords]
+
+# -------------------------------
+# Load discarded keywords
+# -------------------------------
+discarded_keywords = set()
+try:
+    with open(DISCARDED_KEYWORDS_FILE, encoding="utf-8") as f:
+        for line in f:
+            kw = line.strip().lower()
+            if kw:
+                discarded_keywords.add(kw)
+except FileNotFoundError:
+    discarded_keywords = set()
+
+# -------------------------------
+# Prepare a list to store all keywords for this run
+# -------------------------------
+all_keywords = set()
 
 # -------------------------------
 # Format date to DD.MM.YYYY
@@ -153,141 +173,18 @@ for _ in range(10):
 # -------------------------------
 # Generate HTML
 # -------------------------------
-html = """
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>LinksFilter</title>
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-<style>
+# Load HTML template
+with open("docs/template.html", encoding="utf-8") as f:
+    template_html = f.read()
 
-:root {
-    --primary-color: #D95BF5;
-    --hover-color: #B248C9;
-}
-
-h1,
-.card-title,
-.similar-links a,
-.card-img-top {
-    color: var(--primary-color);
-}
-
-/* Optional: hover effect */
-.card-link-wrapper:hover .card-title,
-.similar-links a:hover {
-    text-decoration: underline;
-    color: var(--hover-color);
-}
-
-.card-link-wrapper {
-    display: block;
-    text-decoration: none;
-    color: inherit;
-    transition: transform 0.15s ease, box-shadow 0.15s ease;
-    margin-bottom: 1rem;
-    border-radius: 0.25rem;
-}
-
-.card-link-wrapper:hover {
-    cursor: pointer;
-}
-
-.card-img-top {
-    width: 100%;
-    aspect-ratio: 2 / 1; /* 3:2 ratio */
-    object-fit: cover;    /* crop or fill to fit */
-    border-radius: 0.25rem 0.25rem 0 0;
-}
-
-.card-body {
-    padding: 1rem;
-}
-
-.card-title {
-    margin-bottom: 0.5rem;
-    font-size: 1.25rem;
-    text-decoration: none;
-}
-
-.card-link-wrapper:hover .card-title {
-    text-decoration: underline;
-}
-
-.card-date {
-    font-size: 0.85rem;
-    color: gray;
-    margin-bottom: 0.5rem;
-}
-
-.card-img-wrapper {
-    position: relative;
-    width: 100%;
-    padding-top: 50%;
-    overflow: hidden;
-    border-radius: 0.25rem 0.25rem 0 0;
-    filter: saturate(25%);
-}
-
-.card-img-wrapper img {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-}
-
-/* Tint overlay */
-.card-img-wrapper::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: var(--primary-color);
-    opacity: 0.25;
-    pointer-events: none;
-}
-
-.keywords {
-    font-size: 0.85rem;
-    color: #444;
-    margin-bottom: 0.5rem;
-}
-
-.similar-links a {
-    display: block;
-    font-size: 0.9rem;
-    margin-bottom: 0.25rem;
-    text-decoration: none;
-    color: var(--primary-color);
-}
-
-.similar-links a:hover {
-    text-decoration: underline;
-    color: var(--hover-color);
-}
-</style>
-</head>
-<body class="bg-light">
-<div class="container py-5" style="max-width: 800px;">
-<h1 class="mb-4">LinksFilter</h1>
-<div class="row g-3">
-"""
-
+# Generate cards HTML only
+cards_html = ""
 for cluster in clusters:
     main = cluster["main"]
     others = cluster["similar"]
-
     img_html = f'<img src="{main["thumb"]}" class="card-img-top" alt="">' if main["thumb"] else ""
-    date_str = format_date(main.get("date", ""))
 
-    # Domain and date
+    date_str = format_date(main.get("date", ""))
     main_domain = get_domain(main["link"])
     if main_domain and date_str:
         meta_html = f'<div class="card-date">{main_domain} | {date_str}</div>'
@@ -297,19 +194,14 @@ for cluster in clusters:
         meta_html = f'<div class="card-date">{date_str}</div>'
     else:
         meta_html = ""
+    col_class = "col-md-6" if len(others) == 0 else "col-12"
 
-    # Determine column width
-    if len(others) == 0:
-        col_class = "col-md-6"  # Half width for single cards
-    else:
-        col_class = "col-12"    # Full width for collection cards
+    filtered_keywords = [kw for kw in cluster["keywords"] if kw.lower() not in discarded_keywords]
+    cluster["keywords"] = filtered_keywords
+    all_keywords.update([kw.lower() for kw in cluster["keywords"]])
+    kw_html = '<div class="keywords">' + " • ".join(filtered_keywords) + "</div>" if filtered_keywords else ""
 
-    # Keywords
-    kw_html = ""
-    if cluster["keywords"]:
-        kw_html = '<div class="keywords">' + " • ".join(cluster["keywords"]) + "</div>"
-
-    html += f"""
+    cards_html += f"""
     <div class="{col_class}">
     <a href="{main['link']}" target="_blank" class="card-link-wrapper">
       <div class="card shadow-sm mb-3">
@@ -323,31 +215,24 @@ for cluster in clusters:
           {kw_html}
           <div class="similar-links">
     """
-
     for o in others:
         domain_o = get_domain(o["link"])
         date_o = f', {format_date(o["date"])}' if o.get("date") else ""
-        html += f'<a href="{o["link"]}" target="_blank">{o["title"]} ({domain_o}{date_o})</a>'
+        cards_html += f'<a href="{o["link"]}" target="_blank">{o["title"]} ({domain_o}{date_o})</a>'
+    cards_html += "</div></div></div></a></div>"
 
-    html += """
-            </div>
-        </div>
-        </div>
-    </a>
-    </div>
-    """
+# Inject cards into template
+final_html = template_html.replace("{{content}}", cards_html)
 
-html += """
-</div>
-</div>
-</body>
-</html>
-"""
+# Save all keywords to keywords.csv (overwrite each run)
+with open(KEYWORDS_FILE, "w", encoding="utf-8", newline="") as f:
+    writer = csv.writer(f)
+    writer.writerow(["keyword"])
+    for kw in sorted(all_keywords):
+        writer.writerow([kw])
 
-# -------------------------------
 # Save HTML
-# -------------------------------
 with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
-    f.write(html)
+    f.write(final_html)
 
 print("Website generated:", OUTPUT_FILE)
