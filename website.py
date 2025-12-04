@@ -144,7 +144,7 @@ cos_sim = cosine_similarity(last_50_tfidf)
 # -------------------------------
 # Greedy clustering: pick 10 main links (most recent as main)
 # -------------------------------
-remaining_indices = list(range(len(meta_list)))
+remaining_indices = list(range(len(meta_list[-50:])))
 clusters = []
 
 for _ in range(10):
