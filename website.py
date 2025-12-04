@@ -116,8 +116,7 @@ with open(PARSED_FILE, encoding="utf-8") as f:
 with open(POSTED_FILE, encoding="utf-8") as f:
     all_links = [line.strip() for line in f.readlines() if line.strip()]
 
-#select last 500 links to fit model
-last500_links = reversed(all_links[-500:])
+last50_links = reversed(all_links[-50:])
 
 # -------------------------------
 # Get metadata from parsed.csv
@@ -137,14 +136,12 @@ vectorizer = TfidfVectorizer(
 )
 tfidf_matrix = vectorizer.fit_transform(texts)
 
-#select only last 50 articles for display
-last_50_tfidf = tfidf_matrix[-50:]
-cos_sim = cosine_similarity(last_50_tfidf)
+cos_sim = cosine_similarity(tfidf_matrix)
 
 # -------------------------------
 # Greedy clustering: pick 10 main links (most recent as main)
 # -------------------------------
-remaining_indices = list(range(len(meta_list[-50:])))
+remaining_indices = list(range(len(meta_list)))
 clusters = []
 
 for _ in range(10):
