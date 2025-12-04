@@ -165,7 +165,7 @@ for _ in range(10):
             return parser.parse(a.get("date", "1900-01-01"))
         except:
             return parser.parse("1900-01-01")
-    cluster_articles.sort(key=date_key, reverse=True)
+    #cluster_articles.sort(key=date_key, reverse=True)
     main_article = cluster_articles[0]
     other_articles = cluster_articles[1:]
 
