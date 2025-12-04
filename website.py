@@ -122,7 +122,7 @@ last50_links = reversed(all_links[-50:])
 # Get metadata from parsed.csv
 # -------------------------------
 meta_list = []
-for link in last500_links:
+for link in last50_links:
     meta = parsed_dict.get(link, {"title": link, "description": "", "thumb": "", "date": ""})
     meta["link"] = link
     meta_list.append(meta)
