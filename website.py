@@ -102,13 +102,16 @@ parsed_dict = {}
 with open(PARSED_FILE, encoding="utf-8") as f:
     reader = csv.DictReader(f)
     for row in reader:
-        link = row["link"].strip()
-        parsed_dict[link] = {
-            "title": row.get("titel") or row.get("title") or link,
-            "description": row.get("beschreibung") or row.get("description") or "",
-            "thumb": row.get("thumb") or "",
-            "date": row.get("date") or ""
-        }
+        try:
+            link = row["link"].strip()
+            parsed_dict[link] = {
+                "title": row.get("titel") or row.get("title") or link,
+                "description": row.get("beschreibung") or row.get("description") or "",
+                "thumb": row.get("thumb") or "",
+                "date": row.get("date") or ""
+            }
+        except:
+            pass
 
 # -------------------------------
 # Load last 50 links from posted.csv
