@@ -102,13 +102,16 @@ parsed_dict = {}
 with open(PARSED_FILE, encoding="utf-8") as f:
     reader = csv.DictReader(f)
     for row in reader:
-        link = row["link"].strip()
-        parsed_dict[link] = {
-            "title": row.get("titel") or row.get("title") or link,
-            "description": row.get("beschreibung") or row.get("description") or "",
-            "thumb": row.get("thumb") or "",
-            "date": row.get("date") or ""
-        }
+        try:
+            link = row["link"].strip()
+            parsed_dict[link] = {
+                "title": row.get("titel") or row.get("title") or link,
+                "description": row.get("beschreibung") or row.get("description") or "",
+                "thumb": row.get("thumb") or "",
+                "date": row.get("date") or ""
+            }
+        except:
+            pass
 
 # -------------------------------
 # Load last 50 links from posted.csv
@@ -135,6 +138,7 @@ vectorizer = TfidfVectorizer(
     stop_words=preprocess_stopwords(stopwords)
 )
 tfidf_matrix = vectorizer.fit_transform(texts)
+
 cos_sim = cosine_similarity(tfidf_matrix)
 
 # -------------------------------
@@ -165,7 +169,7 @@ for _ in range(10):
             return parser.parse(a.get("date", "1900-01-01"))
         except:
             return parser.parse("1900-01-01")
-    cluster_articles.sort(key=date_key, reverse=True)
+    #cluster_articles.sort(key=date_key, reverse=True)
     main_article = cluster_articles[0]
     other_articles = cluster_articles[1:]
 
