@@ -78,35 +78,31 @@ def get_bsky_posts(cursor=NOW.strftime("%Y-%m-%dT%H:%M:%S.%fZ"),days = 7):
     #print(delta.days)
   df = pd.DataFrame(data)
   return df
-
-def generate_facets_from_links_in_text(text):
-    ''' Based on logic in
-        https://github.com/GanWeaving/social-cross-post/blob/main/helpers.py
-
-        Generate atproto facets for each URL in the text
-    '''
-    facets = []
-    for match in URL_PATTERN.finditer(text):
-        facets.append(gen_link(*match.span(), match.group(0)))
-    return facets
-
-def gen_link(start, end, uri):
-    ''' Return a dict defining start + end character along
-    with the type of the facet and where it should link to.
-
-    We're literally saying "characters 4-12" are a link which
-    should point to foo
-    '''
+    
+def gen_link(byte_start, byte_end, uri):
     return {
         "index": {
-            "byteStart": start+8,
-            "byteEnd": end+8
+            "byteStart": byte_start,
+            "byteEnd": byte_end
         },
         "features": [{
             "$type": "app.bsky.richtext.facet#link",
             "uri": uri
         }]
     }
+
+def generate_facets_from_links_in_text(text):
+    facets = []
+    # Encode text as UTF-8 bytes to get correct byte positions
+    text_bytes = text.encode('utf-8')
+    
+    for match in URL_PATTERN.finditer(text):
+        # Convert character positions to byte positions
+        byte_start = len(text[:match.start()].encode('utf-8'))
+        byte_end = len(text[:match.end()].encode('utf-8'))
+        facets.append(gen_link(byte_start, byte_end, match.group(0)))
+    
+    return facets
 
 def create_bsky_linkpost(title,description,link,image):
     ''' Post into Bluesky
